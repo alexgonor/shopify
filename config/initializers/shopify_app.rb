@@ -10,6 +10,5 @@ ShopifyApp.configure do |config|
     {topic: 'products/create', address: 'https://user53.mocstage.com/webhooks/products_create', format: 'json'},
     {topic: 'products/update', address: 'https://user53.mocstage.com/webhooks/products_update', format: 'json'},
     {topic: 'products/delete', address: 'https://user53.mocstage.com/webhooks/products_delete', format: 'json'}
-
   ]
 end
