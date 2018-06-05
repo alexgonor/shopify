@@ -1,0 +1,2 @@
+class ProductsCreateJob < ProductsUpdateJob
+end

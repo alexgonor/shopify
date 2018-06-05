@@ -1,16 +1,21 @@
 module Sync
-  class SyncProduct
-    attr :shop, :products_ids, :shopify_product_ids
+  class Product
+    attr_accessor :shop, :products_ids, :shopify_product_ids, :webhook
 
-    def initialize(shop)
-      @shop = shop
+    def initialize(args = {})
+      args.each { |k, v| send("#{k}=", v) }
       @shopify_product_ids = []
     end
 
-    def sync
+    def sync_after_install
       activate_session
       update_products
       clear_session
+    end
+
+    def sync_after_webhook
+      @webhook = OpenStruct.new(webhook)
+      update_product(webhook)
     end
 
     def update_products
@@ -31,7 +36,7 @@ module Sync
     end
 
     def update_variants(product, shopify_variant_collection)
-      Sync::SyncVariant.new(product, shopify_variant_collection).sync
+      Sync::Variant.new(product: product, shopify_variants_collection: shopify_variant_collection).sync
     end
 
     def product_shopify_ids
@@ -56,6 +61,11 @@ module Sync
 
     def clear_session
       ShopifyAPI::Base.clear_session
+    end
+
+    def destroy_product(shopify_id)
+      product = shop.products.find_by(shopify_id: shopify_id)
+      product.destroy if product
     end
   end
 end
