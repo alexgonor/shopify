@@ -2,6 +2,9 @@ module Sync
   class Product
     attr_accessor :shop, :products_ids, :shopify_product_ids, :webhook
 
+    LIMIT = 3
+    FIELDS = ['id', 'handle', 'title', 'variants']
+
     def initialize(args = {})
       args.each { |k, v| send("#{k}=", v) }
       @shopify_product_ids = []
@@ -20,9 +23,12 @@ module Sync
 
     def update_products
       @products_ids = product_shopify_ids
-      shopify_product_collection.each do |shopify_product|
-        @shopify_product_ids.push shopify_product.id.to_s
-        update_product(shopify_product)
+      (ShopifyAPI::Product.count/LIMIT+1).times do |i|
+        page = i + 1
+        shopify_product_collection(page).each do |shopify_product|
+          @shopify_product_ids.push shopify_product.id.to_s
+          update_product(shopify_product)
+        end
       end
       destroy_old_products
     end
@@ -43,8 +49,8 @@ module Sync
       shop.products.map(&:shopify_id)
     end
 
-    def shopify_product_collection
-      ShopifyAPI::Product.find(:all, params: {fields: ['id', 'handle', 'title', 'variants']})
+    def shopify_product_collection(page)
+      ShopifyAPI::Product.find(:all, params: { page: page, limit: LIMIT, fields: FIELDS })
     end
 
     def destroy_old_products
