@@ -18,8 +18,12 @@ module ShopApi
           requires :id, type: String, desc: 'ID of the product'
         end
         get ':id', root: 'product' do
-          product = Product.where(id: params[:id]).first!
-          present product
+          product = Product.where(id: params[:id]).first
+          if !product
+            puts error!("product can't be found")
+          else
+            present product, with: ShopApi::Entities::Product
+          end
         end
 
         desc 'Create a product'
@@ -30,7 +34,11 @@ module ShopApi
         end
         put do
           product = Product.create({handle:params[:handle], title:params[:title], shop_id:params[:shop_id]})
-          present product
+          if product.save
+            present product, with: ShopApi::Entities::Product
+          else
+            puts error!("product can't be saved")
+          end
         end
 
         desc 'Update a product'
@@ -40,8 +48,17 @@ module ShopApi
           requires :title, type: String
         end
         post ':id' do
-          product = Product.find(params[:id]).update({handle:params[:handle], title:params[:title]})
-          present product
+          product = Product.find_by(id: params[:id])
+          if product
+            product.update({handle:params[:handle], title:params[:title]})
+            if product.update({handle:params[:handle], title:params[:title]})
+              present product, with: ShopApi::Entities::Product
+            else
+              puts error!("product was not updated")
+            end
+          else
+            puts error!("product can't be found")
+          end
         end
 
         desc 'Delete a product'
@@ -49,8 +66,13 @@ module ShopApi
           requires :id, type: String
         end
         delete ':id' do
-          product = Product.find(params[:id]).destroy!
-          present product
+          product = Product.find_by(id: params[:id])
+          if product
+            product.destroy
+          else
+            puts error!("product can't be found")
+          end
+          present product, with: ShopApi::Entities::Product
         end
       end
     end
