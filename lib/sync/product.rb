@@ -21,11 +21,14 @@ module Sync
       update_product(webhook)
     end
 
+    def page_count
+      (ShopifyAPI::Product.count/LIMIT.to_f).ceil
+    end
+
     def update_products
       @products_ids = product_shopify_ids
-      (ShopifyAPI::Product.count/LIMIT+1).times do |i|
-        page = i + 1
-        shopify_product_collection(page).each do |shopify_product|
+      1.upto(page_count) do |i|
+        shopify_product_collection(i).each do |shopify_product|
           @shopify_product_ids.push shopify_product.id.to_s
           update_product(shopify_product)
         end

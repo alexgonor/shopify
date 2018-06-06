@@ -12,6 +12,8 @@ module ShopApp
     config.load_defaults 5.2
     config.active_job.queue_adapter = :sidekiq
     config.autoload_paths += %W(#{config.root}/lib/)
+    config.paths.add File.join('app', 'api'), glob: File.join('**', '*.rb')
+    config.autoload_paths += Dir[Rails.root.join('app', 'api', '*')]
 
     # Settings in config/environments/* take precedence over those specified here.
     # Application configuration can go into files in config/initializers

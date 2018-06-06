@@ -4,6 +4,7 @@ Rails.application.routes.draw do
   root :to => 'home#index'
   mount ShopifyApp::Engine, at: '/'
   mount Sidekiq::Web => '/sidekiq'
+  mount ShopApi::Base => '/'
 
   namespace :app_proxy do
     root action: 'index'
