@@ -3,7 +3,7 @@ module Sync
     attr_accessor :shop, :products_ids, :shopify_product_ids, :webhook
 
     LIMIT = 3
-    FIELDS = ['id', 'handle', 'title', 'variants']
+    FIELDS = %w[id handle title variants].freeze
 
     def initialize(args = {})
       args.each { |k, v| send("#{k}=", v) }
@@ -22,7 +22,7 @@ module Sync
     end
 
     def page_count
-      (ShopifyAPI::Product.count/LIMIT.to_f).ceil
+      (ShopifyAPI::Product.count / LIMIT.to_f).ceil
     end
 
     def update_products
@@ -74,7 +74,7 @@ module Sync
 
     def destroy_product(shopify_id)
       product = shop.products.find_by(shopify_id: shopify_id)
-      product.destroy if product
+      product&.destroy
     end
   end
 end

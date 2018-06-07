@@ -9,7 +9,6 @@ module ShopApi
         desc 'Return list of products'
         get do
           products = Product.all
-          p products
           present products, with: ShopApi::Entities::Product
         end
 
@@ -19,11 +18,7 @@ module ShopApi
         end
         get ':id', root: 'product' do
           product = Product.where(id: params[:id]).first
-          if !product
-            puts error!("product can't be found")
-          else
-            present product, with: ShopApi::Entities::Product
-          end
+          product ? (present product, with: ShopApi::Entities::Product) : error!("product can't be found")
         end
 
         desc 'Create a product'
@@ -33,12 +28,8 @@ module ShopApi
           requires :shop_id, type: Integer
         end
         put do
-          product = Product.create({handle:params[:handle], title:params[:title], shop_id:params[:shop_id]})
-          if product.save
-            present product, with: ShopApi::Entities::Product
-          else
-            puts error!("product can't be saved")
-          end
+          product = Product.create(handle: params[:handle], title: params[:title], shop_id: params[:shop_id])
+          product.save ? (present product, with: ShopApi::Entities::Product) : error!("product can't be saved")
         end
 
         desc 'Update a product'
@@ -50,14 +41,14 @@ module ShopApi
         post ':id' do
           product = Product.find_by(id: params[:id])
           if product
-            product.update({handle:params[:handle], title:params[:title]})
-            if product.update({handle:params[:handle], title:params[:title]})
+            product.update(handle: params[:handle], title: params[:title])
+            if product.update(handle: params[:handle], title: params[:title])
               present product, with: ShopApi::Entities::Product
             else
-              puts error!("product was not updated")
+              error!('product was not updated')
             end
           else
-            puts error!("product can't be found")
+            error!("product can't be found")
           end
         end
 
@@ -67,12 +58,7 @@ module ShopApi
         end
         delete ':id' do
           product = Product.find_by(id: params[:id])
-          if product
-            product.destroy
-          else
-            puts error!("product can't be found")
-          end
-          present product, with: ShopApi::Entities::Product
+          product ? product.destroy : error!("product can't be found")
         end
       end
     end
